@@ -6,7 +6,6 @@ const fetch = (...args) => import('node-fetch').then(({default: fetch}) => fetch
 require('dotenv').config();
 
 const authController = require('../controllers/auth');
-const {config} = require("dotenv");
 
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
@@ -76,7 +75,7 @@ router.get('/verify-payment/:ref',async(req,res,next)=>{
             if(data.data.status === 'failed'){
                 return res.status(412).json({
                     status: 412,
-                    message: data.gateway_response
+                    message: data.gateway_re
                 });
             }
             if(data.data.status === 'success'){

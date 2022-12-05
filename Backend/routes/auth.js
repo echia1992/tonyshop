@@ -56,55 +56,51 @@ router.put('/auth',async (req,res,next)=>{
 });
 
 router.post('/auth',async (req,res,next)=>{
-    try {
-        let data = req.body
-        if (typeof data.username === 'undefined' || typeof data.password === 'undefined' ||
-            typeof data.username == null || typeof data.password == null || typeof data.username.trim()== '' ||
-           typeof data.password.trim() ==''){
+    try{
+        let data = req.body;
+        if(typeof data.username === 'undefined' || typeof data.password === "undefined" || data.username == null ||  data.password == null){
             res.status(400).json({
                 status: 400,
-                message: 'Please Input required field'
+                message: 'Please input required field'
             });
             return;
         }
         let user = await User.findOne({
-            where: {
+            where:{
                 username: data.username
             },
-            include:[Role]
+            include: [Role]
         });
-        if (user == null || !bcrypt.compareSync(data.password, user.password)){
+        if(user == null || !bcrypt.compareSync(data.password, user.password)){
             res.status(401).json({
                 status: 401,
-                message: 'Username or password is not correct'
+                message: 'Username or password is incorrect'
             });
             return;
         }
-        let validator = require("crypto").randomBytes(10).toString("hex");
+        let validator = require('crypto').randomBytes(10).toString('hex');
         let jwtSecret = 'Anthony secret key';
-        let jwtToken = jwt.sign(
-            {
-                userId: user.id,
-                validator: validator
-            },jwtSecret);
+        let jwtToken = jwt.sign({
+            userId: user.id,
+            validator: validator
+        },jwtSecret);
         let session = await Session.create({
             userId: user.id,
-            validator:validator,
-            ipAddress:req.ip,
-            userAgent: JSON.stringify(req.userAgent),
-            expiresIn: new Date(Date.now() + 7200 * 1000)
+            validator: validator,
+            ipAddress: req.ip,
+            userAgent: JSON.stringify(req.useragent),
+            expiresIn: new Date(Date.now() + (7200 * 1000))
         });
         res.json({
-            status:200,
-            message:'user Logged In successfully',
-            user:user,
-            token:jwtToken,
-            permissions: user.Role.permissions.split(',')
+            status: 200,
+            message: 'User logged in successfully',
+            user: user,
+            token: jwtToken,
+            permissions: user.Role.permissions.split(",")
         });
-        console.log(user);
-    }catch (err){
+    }catch(err){
         res.status(500).json({
-            status:500,
+            status: 500,
             message: err.message
         });
     }

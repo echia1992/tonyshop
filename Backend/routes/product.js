@@ -113,7 +113,6 @@ router.get('/category',async (req,res,next)=>{
         });
     }
 });
-
 router.get('/category/group',async (req,res,next)=>{
 
     try{
@@ -401,11 +400,11 @@ router.delete('/product/:slug',async (req,res,next)=>{
 });
 router.put('/product/variant',async (req,res,next)=>{
     try {
-    if (!authController.hasPermission('create:variant',req) ){
-        return res.status(401).json({
-            status:401,
-            message:'you are not Authorized please contact your admin'
-        });
+        if (!authController.hasPermission('create:variant',req) ){
+            return res.status(401).json({
+                status:401,
+                message:'you are not Authorized please contact your admin'
+            });
     }
         let data = req.body
         if (typeof data.name === 'undefined' || typeof data.name == null || data.name.trim() === ''){

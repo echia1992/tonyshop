@@ -28,8 +28,8 @@ const authRoute = require('./routes/auth')
 const productRoute = require('./routes/product')
 const orderRoute= require('./routes/order')
 const otherRoute= require('./routes/other')
-
-const bcrypt = require("bcryptjs");
+const { resolve4 } = require('dns');
+//const bcrypt = require("bcryptjs");
 
 app.use(async (req,res,next)=>{
   let token = req.header('Authorization');
@@ -84,6 +84,7 @@ app.use(otherRoute);
 const server = http.createServer(app);
 //http://localhost:5000
 db.sync({
+
  //force:true
 }).then(async result=>{
   try {
@@ -137,6 +138,7 @@ db.sync({
       }
    });
     server.listen(5000);
+    //console.log(server);
   }catch(err){
     console.log(err);
   }

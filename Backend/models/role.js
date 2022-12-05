@@ -11,7 +11,7 @@ const role = db.define('Role',{
     name:{
         type:DataTypes.STRING,
         allowNull: false,
-        unique:false
+        unique:true
     },
     permissions:{
         type:DataTypes.TEXT,

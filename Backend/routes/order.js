@@ -10,6 +10,7 @@ const constants = require("../utils/constant");
 const { Op } = require("sequelize");
 const constant = require("../utils/constant");
 
+
 router.put('/checkout',async (req,res,next)=>{
     try{
         if(!authController.hasPermission('create:orders',req)){
@@ -27,7 +28,6 @@ router.put('/checkout',async (req,res,next)=>{
         let items = [];
         let amount = 0;
         carts.forEach(cart=>{
-
             items.push({
                 title: cart.Product.title,
                 price: cart.Product.price,
