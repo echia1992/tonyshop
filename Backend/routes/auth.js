@@ -1,6 +1,7 @@
 const express = require('express');
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken');
+const createError = require('http-errors')
 
 
 const router = express.Router();
@@ -23,11 +24,7 @@ router.put('/auth',async (req,res,next)=>{
             return;
         }
         if (typeof data.password.trim().length >3){
-            res.status(400).json({
-                status: 400,
-                message: 'password too short'
-            });
-            return;
+            return next(createError(400,'password too short'));
         }
 
         let hashedPass = bcrypt.hashSync(data.password,bcrypt.genSaltSync(14))
@@ -48,10 +45,7 @@ router.put('/auth',async (req,res,next)=>{
         })
 
     }catch (err){
-        res.status(500).json({
-            status: 500,
-            message: err.message
-        })
+        return next(createError(500,err.message));
     }
 });
 
@@ -59,11 +53,7 @@ router.post('/auth',async (req,res,next)=>{
     try{
         let data = req.body;
         if(typeof data.username === 'undefined' || typeof data.password === "undefined" || data.username == null ||  data.password == null){
-            res.status(400).json({
-                status: 400,
-                message: 'Please input required field'
-            });
-            return;
+           return next(createError(400,'Please input required field'))
         }
         let user = await User.findOne({
             where:{
@@ -72,11 +62,7 @@ router.post('/auth',async (req,res,next)=>{
             include: [Role]
         });
         if(user == null || !bcrypt.compareSync(data.password, user.password)){
-            res.status(401).json({
-                status: 401,
-                message: 'Username or password is incorrect'
-            });
-            return;
+            return next(createError(401,'Username or password is incorrect'))
         }
         let validator = require('crypto').randomBytes(10).toString('hex');
         let jwtSecret = 'Anthony secret key';
@@ -99,10 +85,7 @@ router.post('/auth',async (req,res,next)=>{
             permissions: user.Role.permissions.split(",")
         });
     }catch(err){
-        res.status(500).json({
-            status: 500,
-            message: err.message
-        });
+
     }
 });
 router.get('/users', async (req,res,next)=>{
@@ -112,7 +95,7 @@ router.get('/users', async (req,res,next)=>{
         users: await User.findAll()
     });
 });
-router.get('/users', async (req,res,next)=>{
+router.get('/admin', async (req,res,next)=>{
     res.status(200).json({
         status: 200,
         message: "Users fetched successfully",
@@ -128,10 +111,7 @@ router.get('/auth',async(req,res,next)=>{
             permissions: req.User.Role.permissions.split(",")
         });
     }else{
-        res.status(401).json({
-            status: 401,
-            message: "You need to login"
-        });
+        return next(createError(401, 'You need to Login'))
     }
 });
 

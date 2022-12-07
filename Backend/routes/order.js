@@ -1,6 +1,7 @@
 const express = require("express");
 const authController = require("../controllers/auth");
 const router = express.Router();
+const createError = require('http-errors')
 
 const Cart = require("../models/cart");
 const Order = require("../models/order");
@@ -14,10 +15,7 @@ const constant = require("../utils/constant");
 router.put('/checkout',async (req,res,next)=>{
     try{
         if(!authController.hasPermission('create:orders',req)){
-            return res.status(403).json({
-                status: 403,
-                message: 'You are not authorized to access this resource'
-            });
+            return next(createError(403,'You are not authorized to access this resource'));
         }
         let carts = await Cart.findAll({
             where: {
@@ -58,19 +56,13 @@ router.put('/checkout',async (req,res,next)=>{
             order: order
         });
     }catch(err){
-        return res.status(500).json({
-            status: 500,
-            message: err.message
-        });
+        next(createError(err.statusCode || 500,err.message));
     }
 });
 router.post('/order/:ref',async(req,res,next)=>{
     try{
         if(!authController.hasPermission('update:order-status',req)){
-            return res.status(403).json({
-                status: 403,
-                message: 'You are not authorized to access this resource'
-            });
+            return next(createError(403,'You are not authorized to access this resource'))
         }
         let order = await Order.findOne({
             where:{
@@ -78,23 +70,15 @@ router.post('/order/:ref',async(req,res,next)=>{
             }
         });
         if(order == null){
-            return res.status(404).json({
-                status: 404,
-                message: "Order could not be found"
-            });
+            return next(createError(404,'Order Not Found'));
         }
         let status = +req.body.status || null;
         if(status == null){
-            return res.status(400).json({
-                status: 400,
-                message: "Please specify the order status"
-            });
+            return next(createError(400,'Please specify the order status'));
         }
         if(typeof constants.orderStatus[+status] === 'undefined'){
-            return res.status(400).json({
-                status: 400,
-                message: "Order status is not valid"
-            });
+            return next(createError(400,'Order status is not valid'));
+
         }
         await order.update({
             status: status
@@ -104,19 +88,13 @@ router.post('/order/:ref',async(req,res,next)=>{
             message: "Order status updated successfully"
         });
     }catch(err){
-        return res.status(500).json({
-            status: 500,
-            message: err.message
-        });
+        next(createError(err.statusCode || 500,err.message));
     }
 });
 router.get('/order/:ref',async(req,res,next)=>{
     try{
         if(!authController.hasPermission('get:orders',req)){
-            return res.status(403).json({
-                status: 403,
-                message: 'You are not authorized to access this resource'
-            });
+            return next(createError(403,'You are not authorized to access this resource'))
         }
         let order = await Order.findOne({
             where:{
@@ -125,10 +103,8 @@ router.get('/order/:ref',async(req,res,next)=>{
             }
         });
         if(order == null){
-            return res.status(404).json({
-                status: 404,
-                message: "Order could not be found"
-            });
+            return next(createError(404,'Order Not Found'));
+
         }
         order.items = JSON.parse(order.items);
         order.status = {
@@ -141,19 +117,13 @@ router.get('/order/:ref',async(req,res,next)=>{
             order: order
         });
     }catch(err){
-        return res.status(500).json({
-            status: 500,
-            message: err.message
-        });
+        next(createError(err.statusCode || 500,err.message));
     }
 });
 router.get('/orders',async(req,res,next)=>{
     try{
         if(!authController.hasPermission('get:orders',req)){
-            return res.status(403).json({
-                status: 403,
-                message: 'You are not authorized to access this resource'
-            });
+            return next(createError(403,'You are not authorized to access this resource'))
         }
         let orders = await Order.findAll({
             where:{
@@ -174,19 +144,13 @@ router.get('/orders',async(req,res,next)=>{
             orders: orders
         });
     }catch(err){
-        return res.status(500).json({
-            status: 500,
-            message: err.message
-        });
+        next(createError(err.statusCode || 500,err.message));
     }
 });
 router.get('admin/orders',async(req,res,next)=>{
     try{
         if(!authController.hasPermission('access-all',req)){
-            return res.status(403).json({
-                status: 403,
-                message: 'You are not authorized to access this resource'
-            });
+            return next(createError(403,'You are not authorized to access this resource'))
         }
         let orders = await Order.findAll();
         orders = orders.map(order=>{
@@ -203,10 +167,7 @@ router.get('admin/orders',async(req,res,next)=>{
             orders: orders
         });
     }catch(err){
-        return res.status(500).json({
-            status: 500,
-            message: err.message
-        });
+        next(createError(err.statusCode || 500,err.message));
     }
 });
 

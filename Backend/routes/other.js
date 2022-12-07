@@ -2,6 +2,7 @@ const express = require("express")
 const router = express.Router()
 const multer = require('multer')
 const path = require('path')
+const createError = require('http-errors')
 const fetch = (...args) => import('node-fetch').then(({default: fetch}) => fetch(...args));
 require('dotenv').config();
 
@@ -27,15 +28,9 @@ const upload = multer({ storage: storage });
 router.put('/upload',upload.single('upload'),async(req,res,next)=>{
     try {
         if (!authController.hasPermission('upload-image',req)) {
-            return res.status(401).json({
-                status: 401,
-                message: 'You are not allow to access this page '
-            })
+            return next(401,'You are not allow to access this page');
             if (typeof req.file === 'undefined') {
-               return  res.status(400).json({
-                    status: 400,
-                    message: 'No file uploaded'
-                });
+                return next(createError(400,'no file uploaded'));
             }
         }
         res.status(201).json({
@@ -44,19 +39,13 @@ router.put('/upload',upload.single('upload'),async(req,res,next)=>{
             path: 'uploads/'+req.file.filename
         });
     }catch (err){
-        return res.status(500).json({
-            status: 500,
-            message: err.message
-        });
+        next(createError(err.statusCode || 500,err.message));
     }
 })
 router.get('/verify-payment/:ref',async(req,res,next)=>{
     try{
         if(typeof req.User === 'undefined'){
-            return res.status(403).json({
-                status: 403,
-                message: 'You are not authorized to access this resource'
-            });
+            return next(createError(403,'You are not authorized to access this resource'));
         }
         fetch('https://api.paystack.co/transaction/verify/'+req.params.ref,{
             headers: {
@@ -67,16 +56,10 @@ router.get('/verify-payment/:ref',async(req,res,next)=>{
             return response.json();
         }).then(data=>{
             if(typeof data.data === 'undefined'){
-                return res.status(400).json({
-                    status: 400,
-                    message: data.message
-                });
+                return next(createError(400,data.message));
             }
             if(data.data.status === 'failed'){
-                return res.status(412).json({
-                    status: 412,
-                    message: data.gateway_re
-                });
+                return next(createError(400,data.gateway_response));
             }
             if(data.data.status === 'success'){
                 return res.status(200).json({
@@ -85,21 +68,12 @@ router.get('/verify-payment/:ref',async(req,res,next)=>{
                     reference: data
                 });
             }
-            return res.status(422).json({
-                status: 422,
-                message: 'Not processable'
-            });
+            return next(createError(422,'Not processable'))
         }).catch(err=>{
-            return res.status(500).json({
-                status: 500,
-                message: err.message
-            });
+            return next(500,err.message)
         });
     }catch(err){
-        return res.status(500).json({
-            status: 500,
-            message: err.message
-        });
+        next(createError(err.statusCode || 500,err.message));
     }
 })
 module.exports = router;

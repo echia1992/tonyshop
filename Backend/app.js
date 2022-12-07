@@ -80,6 +80,12 @@ app.use(productRoute);
 app.use(orderRoute);
 app.use(otherRoute);
 
+app.use((err,req,res,next)=>{
+  let statusCode = err.statusCode || 500;
+  res.status(statusCode).json({
+    status: statusCode,
+  })
+});
 
 const server = http.createServer(app);
 //http://localhost:5000

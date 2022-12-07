@@ -49,7 +49,7 @@ export default new Vuex.Store({
           },
           {
             name: "User",
-            link: "/user",
+            link: "/users",
             permissionRequired: ['access-all']
           },
           {

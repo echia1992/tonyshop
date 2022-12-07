@@ -57,18 +57,18 @@ const routes = [
     name: 'cart',
     component: Cart
   },{
-    path: '/order',
-    name: 'order',
+    path: '/orders',
+    name: 'orders',
     component: Order
   },
   {
-    path: '/singleorder',
-    name: 'singleorder',
+    path: '/order/:ref',
+    name: 'order-single',
     component: SingleOrder
   },
   {
-    path: '/user',
-    name: 'user',
+    path: '/users',
+    name: 'users',
     component: User
   },
 ]

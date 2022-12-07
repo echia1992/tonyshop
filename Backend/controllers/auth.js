@@ -1,18 +1,14 @@
 const express = require('express');
+const createError = require('http-errors')
 
-
-const isAuth = (req,res,nex)=>{
+const isAuth = (req,res,next)=>{
     if (typeof req.User === 'undefined' || req.User == null){
-        res.status(401).json({
-            status:401,
-            message: 'You are not Authenticated'
-        })
+        return next(createError(401,'You are not Authenticated'));
     }
 }
 module.exports.isAuth = isAuth;
 
 exports.hasPermission = (perm,req)=>{
-    //console.log(req.User)
     if (typeof req.User === 'undefined' || req.User == null){
         return false
     }

@@ -148,7 +148,7 @@ export default {
   }),
   methods: {
     getOrder(){
-      fetch(this.$store.state.baseUrl+'order/'+this.$route.params.ref,{
+      fetch(this.$store.state.baseUrl+'orders/'+this.$route.params.ref,{
         method: 'GET',
         headers: {
           'Authorization': this.$store.state.jwt_token
